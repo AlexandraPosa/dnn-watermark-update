@@ -5,13 +5,12 @@ import json
 import os
 import sklearn.metrics as metrics
 import wide_residual_network as wrn
-import keras.callbacks as callbacks
 import keras.utils.np_utils as kutils
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
 from keras.optimizers import SGD
-from keras.callbacks import LearningRateScheduler
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 from watermark_regularizers import WatermarkRegularizer
 from watermark_regularizers import get_wmark_regularizers
@@ -114,12 +113,13 @@ if __name__ == '__main__':
     print("Finished compiling")
 
     hist = \
-    model.fit_generator(generator.flow(trainX, trainY, batch_size=batch_size), samples_per_epoch=len(trainX), nb_epoch=nb_epoch,
-                        callbacks=[callbacks.ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_acc", save_best_only=True),
-                                   LearningRateScheduler(schedule=schedule)
+    model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
+              steps_per_epoch=len(trainX), epochs=nb_epoch,
+              callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_acc", save_best_only=True),
+                         LearningRateScheduler(schedule=schedule)
                         ],
                         validation_data=(testX, testY),
-                        nb_val_samples=testX.shape[0],)
+                        validation_steps=testX.shape[0],)
     show_encoded_wmark(model)
 
     # validate training accuracy
