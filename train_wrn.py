@@ -100,7 +100,7 @@ if __name__ == '__main__':
     b = np.ones((1, embed_dim))
     wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
 
-    init_shape = (3, 32, 32) if K.image_dim_ordering() == 'th' else (32, 32, 3)
+    init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
                                              wmark_regularizer=wmark_regularizer, target_blk_num=target_blk_id)
     model.summary()
