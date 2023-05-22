@@ -12,9 +12,9 @@ from keras import backend as K
 from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
-from watermark_regularizers import WatermarkRegularizer
-from watermark_regularizers import get_wmark_regularizers
-from watermark_regularizers import show_encoded_wmark
+#from watermark_regularizers import WatermarkRegularizer
+#from watermark_regularizers import get_wmark_regularizers
+#from watermark_regularizers import show_encoded_wmark
 
 RESULT_PATH = './result'
 MODEL_CHKPOINT_FNAME = os.path.join(RESULT_PATH, 'WRN-Weights.h5')
@@ -26,14 +26,14 @@ def update_hdf5(fname, path, data):
         store.remove(path)
     store.append(path, data)
     store.close()
-
+"""
 def save_wmark_signatures(prefix, model):
     for layer_id, wmark_regularizer in get_wmark_regularizers(model):
         fname_w = prefix + '_layer{}_w.npy'.format(layer_id)
         fname_b = prefix + '_layer{}_b.npy'.format(layer_id)
         np.save(fname_w, wmark_regularizer.get_matrix())
         np.save(fname_b, wmark_regularizer.get_signature())
-
+"""
 lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
@@ -97,13 +97,13 @@ if __name__ == '__main__':
 
     # initialize process for Watermark
     b = np.ones((1, embed_dim))
-    wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
+    #wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
 
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
-                                             wmark_regularizer=wmark_regularizer, target_blk_num=target_blk_id)
+                                             wmark_regularizer="l2", target_blk_num=target_blk_id)
     model.summary()
-    print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
+    #print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
 
     # training process
     sgd = SGD(lr=0.1, momentum=0.9, nesterov=True)
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                         ],
                         validation_data=(testX, testY),
                         validation_steps=testX.shape[0],)
-    show_encoded_wmark(model)
+    #show_encoded_wmark(model)
 
     # validate training accuracy
     yPreds = model.predict(testX)
@@ -138,5 +138,5 @@ if __name__ == '__main__':
     model.save_weights(modelname_prefix + '.weight')
 
     # write watermark matrix and embedded signature to file
-    if target_blk_id > 0:
-        save_wmark_signatures(modelname_prefix, model)
+   # if target_blk_id > 0:
+    #    save_wmark_signatures(modelname_prefix, model)
