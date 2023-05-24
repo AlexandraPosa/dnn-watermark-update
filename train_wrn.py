@@ -38,7 +38,7 @@ lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
     if (epoch_idx + 1) < lr_schedule[0]:
-        return 0.1
+        return 0.01
     elif (epoch_idx + 1) < lr_schedule[1]:
         return 0.02 # lr_decay_ratio = 0.2
     elif (epoch_idx + 1) < lr_schedule[2]:
@@ -107,19 +107,19 @@ if __name__ == '__main__':
 
     # training process
     sgd = SGD(lr=0.1, momentum=0.9, nesterov=True)
-    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["acc"])
+    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"])
     if len(base_modelw_fname) > 0:
         model.load_weights(base_modelw_fname)
     print("Finished compiling")
 
     hist = \
     model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
-              steps_per_epoch=len(trainX), epochs=nb_epoch,
-              callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_acc", save_best_only=True),
-                         LearningRateScheduler(schedule=schedule)
-                        ],
-                        validation_data=(testX, testY),
-                        validation_steps=testX.shape[0],)
+              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=nb_epoch,
+              callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_accuracy", save_best_only=True),
+                         LearningRateScheduler(schedule=schedule)],
+              validation_data=(testX, testY),
+              validation_steps=np.ceil(len(testX)/batch_size))
+
     #show_encoded_wmark(model)
 
     # validate training accuracy
