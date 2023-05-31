@@ -39,11 +39,11 @@ lr_schedule = [60, 120, 160]  # epoch_step
 def schedule(epoch_idx):
     if (epoch_idx + 1) < lr_schedule[0]:
         return 0.01
-    elif (epoch_idx + 1) < lr_schedule[1]:
-        return 0.02 # lr_decay_ratio = 0.2
+    elif (epoch_idx + 1) < lr_schedule[1]:   # lr_decay_ratio = 0.2
+        return 0.002
     elif (epoch_idx + 1) < lr_schedule[2]:
-        return 0.004
-    return 0.0008
+        return 0.0004
+    return 0.00008
 
 if __name__ == '__main__':
     settings_json_fname = sys.argv[1]
@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
-                                             wmark_regularizer="l2", target_blk_num=target_blk_id)
+                                             wmark_regularizer=None, target_blk_num=target_blk_id)
     model.summary()
     #print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
 
