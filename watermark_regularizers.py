@@ -29,7 +29,7 @@ class WatermarkRegularizer(Regularizer):
         self.p = p
 
         # make matrix
-        p_shape = K.get_variable_shape(p)
+        p_shape = K.shape(p)
         w_rows = np.prod(p_shape[0:3]) # todo: append theano pattern
         w_cols = self.b.shape[1]
 

@@ -5,17 +5,16 @@ import json
 import os
 import sklearn.metrics as metrics
 import wide_residual_network as wrn
-import keras.callbacks as callbacks
 import keras.utils.np_utils as kutils
 from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
 from keras.optimizers import SGD
-from keras.callbacks import LearningRateScheduler
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
-from watermark_regularizers import WatermarkRegularizer
-from watermark_regularizers import get_wmark_regularizers
-from watermark_regularizers import show_encoded_wmark
+#from watermark_regularizers import WatermarkRegularizer
+#from watermark_regularizers import get_wmark_regularizers
+#from watermark_regularizers import show_encoded_wmark
 
 RESULT_PATH = './result'
 MODEL_CHKPOINT_FNAME = os.path.join(RESULT_PATH, 'WRN-Weights.h5')
@@ -27,24 +26,24 @@ def update_hdf5(fname, path, data):
         store.remove(path)
     store.append(path, data)
     store.close()
-
+"""
 def save_wmark_signatures(prefix, model):
     for layer_id, wmark_regularizer in get_wmark_regularizers(model):
         fname_w = prefix + '_layer{}_w.npy'.format(layer_id)
         fname_b = prefix + '_layer{}_b.npy'.format(layer_id)
         np.save(fname_w, wmark_regularizer.get_matrix())
         np.save(fname_b, wmark_regularizer.get_signature())
-
+"""
 lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
     if (epoch_idx + 1) < lr_schedule[0]:
-        return 0.1
-    elif (epoch_idx + 1) < lr_schedule[1]:
-        return 0.02 # lr_decay_ratio = 0.2
+        return 0.01
+    elif (epoch_idx + 1) < lr_schedule[1]:   # lr_decay_ratio = 0.2
+        return 0.002
     elif (epoch_idx + 1) < lr_schedule[2]:
-        return 0.004
-    return 0.0008
+        return 0.0004
+    return 0.00008
 
 if __name__ == '__main__':
     settings_json_fname = sys.argv[1]
@@ -98,29 +97,30 @@ if __name__ == '__main__':
 
     # initialize process for Watermark
     b = np.ones((1, embed_dim))
-    wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
+    #wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
 
-    init_shape = (3, 32, 32) if K.image_dim_ordering() == 'th' else (32, 32, 3)
+    init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
-                                             wmark_regularizer=wmark_regularizer, target_blk_num=target_blk_id)
+                                             wmark_regularizer=None, target_blk_num=target_blk_id)
     model.summary()
-    print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
+    #print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
 
     # training process
     sgd = SGD(lr=0.1, momentum=0.9, nesterov=True)
-    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["acc"])
+    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"])
     if len(base_modelw_fname) > 0:
         model.load_weights(base_modelw_fname)
     print("Finished compiling")
 
     hist = \
-    model.fit_generator(generator.flow(trainX, trainY, batch_size=batch_size), samples_per_epoch=len(trainX), nb_epoch=nb_epoch,
-                        callbacks=[callbacks.ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_acc", save_best_only=True),
-                                   LearningRateScheduler(schedule=schedule)
-                        ],
-                        validation_data=(testX, testY),
-                        nb_val_samples=testX.shape[0],)
-    show_encoded_wmark(model)
+    model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
+              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=nb_epoch,
+              callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_accuracy", save_best_only=True),
+                         LearningRateScheduler(schedule=schedule)],
+              validation_data=(testX, testY),
+              validation_steps=np.ceil(len(testX)/batch_size))
+
+    #show_encoded_wmark(model)
 
     # validate training accuracy
     yPreds = model.predict(testX)
@@ -138,5 +138,5 @@ if __name__ == '__main__':
     model.save_weights(modelname_prefix + '.weight')
 
     # write watermark matrix and embedded signature to file
-    if target_blk_id > 0:
-        save_wmark_signatures(modelname_prefix, model)
+   # if target_blk_id > 0:
+    #    save_wmark_signatures(modelname_prefix, model)
