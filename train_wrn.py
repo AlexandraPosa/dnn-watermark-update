@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random
 import sys
 import json
 import os
@@ -16,6 +17,16 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 #from watermark_regularizers import get_wmark_regularizers
 #from watermark_regularizers import show_encoded_wmark
 
+# Set the seed value
+set_seed = 3
+
+# Set the seed for the random module
+random.seed(set_seed)
+
+# Set the seed for NumPy
+np.random.seed(set_seed)
+
+# Set the path
 RESULT_PATH = './result'
 MODEL_CHKPOINT_FNAME = os.path.join(RESULT_PATH, 'WRN-Weights.h5')
 
@@ -72,7 +83,7 @@ if __name__ == '__main__':
                                    width_shift_range=5./32,
                                    height_shift_range=5./32,
                                    horizontal_flip=True)
-    generator.fit(trainX, seed=0, augment=True)
+    generator.fit(trainX, augment=True)
 
     if 'replace_train_y' in train_settings and len(train_settings['replace_train_y']) > 0:
         print('trainY was replaced from "{}"'.format(train_settings['replace_train_y']))
