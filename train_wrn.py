@@ -4,6 +4,7 @@ import random
 import sys
 import json
 import os
+import tensorflow as tf
 import sklearn.metrics as metrics
 import wide_residual_network as wrn
 import keras.utils.np_utils as kutils
@@ -18,13 +19,16 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 #from watermark_regularizers import show_encoded_wmark
 
 # Set the seed value
-set_seed = 3
+seed_value = 3
 
 # Set the seed for the random module
-random.seed(set_seed)
+random.seed(seed_value)
 
 # Set the seed for NumPy
-np.random.seed(set_seed)
+np.random.seed(seed_value)
+
+# Set the seed for TensorFlow
+tf.random.set_seed(seed_value)
 
 # Set the path
 RESULT_PATH = './result'
