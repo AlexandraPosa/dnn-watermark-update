@@ -30,6 +30,9 @@ np.random.seed(seed_value)
 # Set the seed for TensorFlow
 tf.random.set_seed(seed_value)
 
+# Set the PythonHashSeed
+os.environ['PYTHONHASHSEED'] = str(seed_value)
+
 # Set the path
 RESULT_PATH = './result'
 MODEL_CHKPOINT_FNAME = os.path.join(RESULT_PATH, 'WRN-Weights.h5')
