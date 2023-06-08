@@ -14,7 +14,7 @@ from keras import backend as K
 from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
-#from watermark_regularizers import WatermarkRegularizer
+from watermark_regularizer_new import WatermarkRegularizer
 #from watermark_regularizers import get_wmark_regularizers
 #from watermark_regularizers import show_encoded_wmark
 
@@ -114,12 +114,12 @@ if __name__ == '__main__':
     modelname_prefix = os.path.join(RESULT_PATH, 'wrn_' + hist_hdf_path.replace('/', '_'))
 
     # initialize process for Watermark
-    b = np.ones((1, embed_dim))
-    #wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
+    # wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
 
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
-                                             wmark_regularizer=None, target_blk_num=target_blk_id)
+                                             wmark_regularizer=WatermarkRegularizer(strength=scale),
+                                             target_blk_num=target_blk_id)
     model.summary()
     #print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
 
