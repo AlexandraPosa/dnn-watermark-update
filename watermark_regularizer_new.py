@@ -26,7 +26,8 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
             tf.keras.losses.binary_crossentropy(
                 tf.sigmoid(tf.matmul(weights_flat, matrix)), signature))
 
-        return regularized_loss
+        # apply a penalty to the loss function during the training phase
+        return tf.keras.backend.in_train_phase(regularized_loss, tf.zeros_like(regularized_loss))
 
     def get_config(self):
         return {'strength': self.strength}
