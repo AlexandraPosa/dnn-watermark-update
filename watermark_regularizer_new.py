@@ -7,16 +7,18 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
         self.uses_learning_phase = True
 
     def __call__(self, weights):
-
-        signature = tf.ones((1, 256))
         self.weights = weights
 
-        # build a random matrix
+        # define signature
+        signature = tf.ones((1, 256))
+
+        # build random matrix
         weights_shape = tf.shape(weights)
         mat_rows = tf.reduce_prod(weights_shape[0:3])
         mat_cols = signature.shape[1]
-
         matrix = tf.random.normal((mat_rows, mat_cols))
+
+        # compute cross-entropy loss
         weights_mean = tf.reduce_mean(weights, axis=3)
         weights_flat = tf.reshape(weights_mean, (1, tf.size(weights_mean)))
 
