@@ -4,12 +4,11 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
     def __init__(self, strength):
         self.strength = strength
-        self.uses_learning_phase = True
 
     def __call__(self, weights):
         self.weights = weights
 
-        # define signature
+        # set watermark
         signature = tf.ones((1, 256))
 
         # build random matrix
@@ -26,8 +25,8 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
             tf.keras.losses.binary_crossentropy(
                 tf.sigmoid(tf.matmul(weights_flat, matrix)), signature))
 
-        # apply a penalty to the loss function during the training phase
-        return tf.keras.backend.in_train_phase(regularized_loss, tf.zeros_like(regularized_loss))
+        # apply a penalty to the loss function
+        return regularized_loss
 
     def get_config(self):
         return {'strength': self.strength}
