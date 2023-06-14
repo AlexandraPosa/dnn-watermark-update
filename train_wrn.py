@@ -113,19 +113,16 @@ if __name__ == '__main__':
         wtype, embed_dim, scale, N, k, batch_size, nb_epoch, target_blk_id)
     modelname_prefix = os.path.join(RESULT_PATH, 'wrn_' + hist_hdf_path.replace('/', '_'))
 
-    # initialize process for Watermark
-    # wmark_regularizer = WatermarkRegularizer(scale, b, wtype=wtype, randseed=randseed)
-
+    # create model
+    watermark_regularizer = WatermarkRegularizer(strength=scale)
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
-                                             wmark_regularizer=WatermarkRegularizer(strength=scale),
-                                             target_blk_num=target_blk_id)
+                                             wmark_regularizer=watermark_regularizer, target_blk_num=target_blk_id)
     model.summary()
-    #print('Watermark matrix:\n{}'.format(wmark_regularizer.get_matrix()))
 
     # training process
     sgd = SGD(lr=0.1, momentum=0.9, nesterov=True)
-    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"])
+    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"], run_eagerly=True)
     if len(base_modelw_fname) > 0:
         model.load_weights(base_modelw_fname)
     print("Finished compiling")
@@ -139,6 +136,9 @@ if __name__ == '__main__':
               validation_steps=np.ceil(len(testX)/batch_size))
 
     #show_encoded_wmark(model)
+
+    # print matrix used for watermark embedding
+    print('Watermark matrix:\n', watermark_regularizer.get_matrix())
 
     # validate training accuracy
     yPreds = model.predict(testX)
