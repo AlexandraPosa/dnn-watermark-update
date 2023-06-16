@@ -19,7 +19,7 @@ from watermark_regularizer_new import WatermarkRegularizer
 #from watermark_regularizers import show_encoded_wmark
 
 # Set the seed value
-seed_value = 3
+seed_value = 0
 
 # Set the seed for the random module
 random.seed(seed_value)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     modelname_prefix = os.path.join(RESULT_PATH, 'wrn_' + hist_hdf_path.replace('/', '_'))
 
     # create model
-    watermark_regularizer = WatermarkRegularizer(strength=scale)
+    watermark_regularizer = WatermarkRegularizer(strength=scale, embed_dim=embed_dim, seed=seed_value)
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
                                              wmark_regularizer=watermark_regularizer, target_blk_num=target_blk_id)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     #show_encoded_wmark(model)
 
-    # print matrix used for watermark embedding
+    # print the matrix used for the watermark embedding
     print('Watermark matrix:\n', watermark_regularizer.get_matrix())
 
     # validate training accuracy

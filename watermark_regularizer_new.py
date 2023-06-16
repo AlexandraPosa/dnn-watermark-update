@@ -2,17 +2,22 @@ import tensorflow as tf
 
 class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
-    def __init__(self, strength):
+    def __init__(self, strength, embed_dim, seed=0):
         self.strength = strength
+        self.embed_dim = embed_dim
+        self.seed = seed
         self.matrix = None
 
     def __call__(self, weights):
         self.weights = weights
 
-        # set watermark
-        signature = tf.ones((1, 256))
+        # define the watermark
+        signature = tf.ones((1, self.embed_dim))
 
-        # build random matrix
+        # set a seed
+        tf.random.set_seed(self.seed)
+
+        # build the projection matrix for the watermark embedding
         weights_shape = tf.shape(weights)
         mat_rows = tf.reduce_prod(weights_shape[0:3])
         mat_cols = signature.shape[1]
@@ -28,6 +33,7 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
         # apply a penalty to the loss function
         return regularized_loss
+
     def get_matrix(self):
         return self.matrix.numpy()
 
