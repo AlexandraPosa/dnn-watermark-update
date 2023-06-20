@@ -19,8 +19,7 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
         np.random.seed(self.seed)
 
         # build the projection matrix for the watermark embedding
-        weights_shape = tf.shape(weights)
-        mat_rows = np.prod(weights_shape[0:3])
+        mat_rows = np.prod(weights.shape[0:3])
         mat_cols = signature.shape[1]
         self.matrix = np.random.randn(mat_rows, mat_cols)
 

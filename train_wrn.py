@@ -122,14 +122,14 @@ if __name__ == '__main__':
 
     # training process
     sgd = SGD(lr=0.1, momentum=0.9, nesterov=True)
-    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"], run_eagerly=True)
+    model.compile(loss="categorical_crossentropy", optimizer=sgd, metrics=["accuracy"])
     if len(base_modelw_fname) > 0:
         model.load_weights(base_modelw_fname)
     print("Finished compiling")
 
     hist = \
     model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
-              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=nb_epoch,
+              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=1,
               callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_accuracy", save_best_only=True),
                          LearningRateScheduler(schedule=schedule)],
               validation_data=(testX, testY),
