@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     hist = \
     model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
-              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=1,
+              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=nb_epoch,
               callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_accuracy", save_best_only=True),
                          LearningRateScheduler(schedule=schedule)],
               validation_data=(testX, testY),
