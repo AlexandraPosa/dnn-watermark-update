@@ -60,7 +60,7 @@ def show_encoded_wmark(model):
                 watermark = tf.sigmoid(tf.matmul(tf.constant(weights_flat, dtype=tf.float32),
                                                  tf.constant(proj_matrix, dtype=tf.float32)))
                 print(watermark.numpy())
-                print(int(watermark.numpy() > 0.5))
+                print((watermark.numpy() > 0.5).astype(int))
 
         except AttributeError:
             continue  # Continue the loop if the layer has no regularizers
