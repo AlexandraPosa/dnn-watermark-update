@@ -20,7 +20,7 @@ def conv1_block(input, k=1, dropout=0.0, regularizer=None):
 
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
 
-    # Check if input number of filters is same as 16 * k, else create convolution2d for this input
+    # Check if input number of filters is same as 16 * k, else create Convolution2D for this input
     if K.image_data_format() == "channels_first":
         if init.shape[1] != 16 * k:
             init = Convolution2D(16 * k, (1, 1), activation='linear', padding='same')(init)
@@ -46,7 +46,7 @@ def conv2_block(input, k=1, dropout=0.0, regularizer=None):
 
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
 
-    # Check if input number of filters is same as 32 * k, else create convolution2d for this input
+    # Check if input number of filters is same as 32 * k, else create Convolution2D for this input
     if K.image_data_format() == "channels_first":
         if init.shape[1] != 32 * k:
             init = Convolution2D(32 * k, (1, 1), activation='linear', padding='same')(init)
@@ -72,7 +72,7 @@ def conv3_block(input, k=1, dropout=0.0, regularizer=None):
 
     channel_axis = 1 if K.image_data_format() == "channels_first" else -1
 
-    # Check if input number of filters is same as 64 * k, else create convolution2d for this input
+    # Check if input number of filters is same as 64 * k, else create Convolution2D for this input
     if K.image_data_format() == "channels_first":
         if init.shape[1] != 64 * k:
             init = Convolution2D(64 * k, (1, 1), activation='linear', padding='same')(init)
@@ -149,9 +149,10 @@ def create_wide_residual_network(input_dim, nb_classes=100, N=2, k=1, dropout=0.
 if __name__ == "__main__":
     from keras.utils import plot_model
 
-    init = (3, 32, 32)
+    init = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
 
-    wrn_28_10 = create_wide_residual_network(init, nb_classes=100, N=4, k=10, dropout=0.25)
+    wrn_16_2 = create_wide_residual_network(init, nb_classes=10, N=2, k=2, dropout=0.0)
 
-    wrn_28_10.summary()
-    plot_model(wrn_28_10, to_file="WRN-28-10.png", show_shapes=True, show_layer_names=True)
+    wrn_16_2.summary()
+
+    plot_model(wrn_16_2, "WRN-16-2.png", show_shapes=True, show_layer_names=True)
