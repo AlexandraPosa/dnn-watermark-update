@@ -136,7 +136,7 @@ if __name__ == '__main__':
               validation_steps=np.ceil(len(testX)/batch_size))
 
     # print the matrix used for the watermark embedding
-    print('Watermark matrix:\n', watermark_regularizer.get_matrix())
+    print('\nWatermark projection matrix:\n', watermark_regularizer.get_matrix())
 
     # print the watermark
     show_encoded_wmark(model)

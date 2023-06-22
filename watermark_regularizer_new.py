@@ -46,7 +46,6 @@ def show_encoded_wmark(model):
     for i, layer in enumerate(model.layers):
         try:
             if isinstance(layer.kernel_regularizer, WatermarkRegularizer):
-                print('\nWatermark:\n Layer Index = {}, Class = {}'.format(i, layer.__class__.__name__))
 
                 # retrieve the weights
                 weights = layer.get_weights()[0]
@@ -59,8 +58,21 @@ def show_encoded_wmark(model):
                 # extract the watermark from the layer
                 watermark = tf.sigmoid(tf.matmul(tf.constant(weights_flat, dtype=tf.float32),
                                                  tf.constant(proj_matrix, dtype=tf.float32)))
-                print(watermark.numpy())
-                print((watermark.numpy() > 0.5).astype(int))
+
+                # print the watermark
+                print('\nWatermark:')
+                print('Layer Index = {} \nClass = {} \n{}\n'.format(i, layer.__class__.__name__, watermark.numpy()))
+
+                # compute confidence levels
+                confidence_levels = [0.5, 0.7, 0.8, 0.9]
+
+                for level in confidence_levels:
+                    confidence = (watermark.numpy() > level).astype(int)
+                    ones = np.count_nonzero(confidence)
+                    zeros = confidence.size - ones
+
+                    print("Confidence level over {}%:".format(int(level * 100)))
+                    print("Number of ones: {}\nNumber of zeros: {}\n{}\n".format(ones, zeros, confidence))
 
         except AttributeError:
             continue  # Continue the loop if the layer has no regularizers
