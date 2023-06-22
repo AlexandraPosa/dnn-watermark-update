@@ -40,3 +40,27 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
     def get_config(self):
         return {'strength': self.strength}
+
+
+def show_encoded_wmark(model):
+    for i, layer in enumerate(model.layers):
+        try:
+            if isinstance(layer.kernel_regularizer, WatermarkRegularizer):
+                print('Watermark: Layer Index = {}, Class = {}'.format(i, layer.__class__.__name__))
+
+                # retrieve the weights
+                weights = layer.get_weights()[0]
+                weights_mean = weights.mean(axis=3)
+                weights_flat = weights_mean.reshape(1, weights_mean.size)
+
+                # retrieve the projection matrix
+                proj_matrix = layer.kernel_regularizer.get_matrix()
+
+                # extract the watermark from the layer
+                watermark = tf.sigmoid(tf.matmul(tf.constant(weights_flat, dtype=tf.float32),
+                                                 tf.constant(proj_matrix, dtype=tf.float32)))
+                print(watermark.numpy())
+                print(watermark.numpy() > 0.5)
+
+        except AttributeError:
+            continue  # Continue the loop if the layer has no regularizers

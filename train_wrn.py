@@ -16,7 +16,7 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 from watermark_regularizer_new import WatermarkRegularizer
 #from watermark_regularizers import get_wmark_regularizers
-#from watermark_regularizers import show_encoded_wmark
+from watermark_regularizer_new import show_encoded_wmark
 
 # Set the seed value
 seed_value = 0
@@ -135,10 +135,11 @@ if __name__ == '__main__':
               validation_data=(testX, testY),
               validation_steps=np.ceil(len(testX)/batch_size))
 
-    #show_encoded_wmark(model)
-
     # print the matrix used for the watermark embedding
     print('Watermark matrix:\n', watermark_regularizer.get_matrix())
+
+    # print the watermark
+    show_encoded_wmark(model)
 
     # validate training accuracy
     yPreds = model.predict(testX)
