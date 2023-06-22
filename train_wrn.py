@@ -15,8 +15,8 @@ from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 from watermark_regularizer_new import WatermarkRegularizer
-#from watermark_regularizers import get_wmark_regularizers
-from watermark_regularizer_new import show_encoded_wmark
+from watermark_regularizer_new import get_watermark_regularizers
+from watermark_regularizer_new import show_encoded_watermark
 
 # Set the seed value
 seed_value = 0
@@ -44,14 +44,14 @@ def update_hdf5(fname, path, data):
         store.remove(path)
     store.append(path, data)
     store.close()
-"""
-def save_wmark_signatures(prefix, model):
-    for layer_id, wmark_regularizer in get_wmark_regularizers(model):
+
+def save_watermark_signatures(prefix, model):
+    for layer_id, regularizer in get_watermark_regularizers(model):
         fname_w = prefix + '_layer{}_w.npy'.format(layer_id)
         fname_b = prefix + '_layer{}_b.npy'.format(layer_id)
-        np.save(fname_w, wmark_regularizer.get_matrix())
-        np.save(fname_b, wmark_regularizer.get_signature())
-"""
+        np.save(fname_w, regularizer.get_matrix())
+        np.save(fname_b, regularizer.get_signature())
+
 lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
     hist = \
     model.fit(generator.flow(trainX, trainY, batch_size=batch_size),
-              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=nb_epoch,
+              steps_per_epoch=np.ceil(len(trainX)/batch_size), epochs=1,
               callbacks=[ModelCheckpoint(MODEL_CHKPOINT_FNAME, monitor="val_accuracy", save_best_only=True),
                          LearningRateScheduler(schedule=schedule)],
               validation_data=(testX, testY),
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     print('\nWatermark projection matrix:\n', watermark_regularizer.get_matrix())
 
     # print the watermark
-    show_encoded_wmark(model)
+    show_encoded_watermark(model)
 
     # validate training accuracy
     yPreds = model.predict(testX)
@@ -157,5 +157,5 @@ if __name__ == '__main__':
     model.save_weights(modelname_prefix + '.weight')
 
     # write watermark matrix and embedded signature to file
-   # if target_blk_id > 0:
-    #    save_wmark_signatures(modelname_prefix, model)
+    if target_blk_id > 0:
+        save_watermark_signatures(modelname_prefix, model)

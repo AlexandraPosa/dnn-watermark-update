@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+
 class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
     def __init__(self, strength, embed_dim, seed=0):
@@ -8,19 +9,20 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
         self.embed_dim = embed_dim
         self.seed = seed
         self.matrix = None
+        self.signature = None
 
     def __call__(self, weights):
         self.weights = weights
 
         # define the watermark
-        signature = np.ones((1, self.embed_dim))
+        self.signature = np.ones((1, self.embed_dim))
 
         # set a seed
         np.random.seed(self.seed)
 
         # build the projection matrix for the watermark embedding
         mat_rows = np.prod(weights.shape[0:3])
-        mat_cols = signature.shape[1]
+        mat_cols = self.signature.shape[1]
         self.matrix = np.random.randn(mat_rows, mat_cols)
 
         # compute cross-entropy loss
@@ -30,7 +32,7 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
         regularized_loss = self.strength * tf.reduce_sum(
             tf.keras.losses.binary_crossentropy(
-                tf.sigmoid(tf.matmul(weights_flat, proj_matrix)), signature))
+                tf.sigmoid(tf.matmul(weights_flat, proj_matrix)), self.signature))
 
         # apply a penalty to the loss function
         return regularized_loss
@@ -38,11 +40,26 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
     def get_matrix(self):
         return self.matrix
 
+    def get_signature(self):
+        return self.signature
+
     def get_config(self):
         return {'strength': self.strength}
 
+def get_watermark_regularizers(model):
+    return_list = []
 
-def show_encoded_wmark(model):
+    for i, layer in enumerate(model.layers):
+        try:
+            if isinstance(layer.kernel_regularizer, WatermarkRegularizer):
+                return_list.append((i, layer.kernel_regularizer))
+        except AttributeError:
+            continue
+
+    return return_list
+
+
+def show_encoded_watermark(model):
     for i, layer in enumerate(model.layers):
         try:
             if isinstance(layer.kernel_regularizer, WatermarkRegularizer):
