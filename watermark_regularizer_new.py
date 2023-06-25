@@ -73,18 +73,19 @@ def show_encoded_watermark(model):
                 proj_matrix = layer.kernel_regularizer.get_matrix()
 
                 # extract the watermark from the layer
-                watermark = tf.sigmoid(tf.matmul(tf.constant(weights_flat, dtype=tf.float32),
-                                                 tf.constant(proj_matrix, dtype=tf.float32)))
+                #watermark = tf.sigmoid(tf.matmul(tf.constant(weights_flat, dtype=tf.float32),
+                #                                 tf.constant(proj_matrix, dtype=tf.float32)))
+                watermark = 1 / (1 + np.exp(-np.dot(weights_flat, proj_matrix)))
 
                 # print the watermark
                 print('\nWatermark:')
-                print('Layer Index = {} \nClass = {} \n{}\n'.format(i, layer.__class__.__name__, watermark.numpy()))
+                print('Layer Index = {} \nClass = {} \n{}\n'.format(i, layer.__class__.__name__, watermark))
 
                 # compute confidence levels
                 confidence_levels = [0.5, 0.7, 0.8, 0.9]
 
                 for level in confidence_levels:
-                    confidence = (watermark.numpy() >= level).astype(int)
+                    confidence = (watermark > level).astype(int)
                     ones = np.count_nonzero(confidence)
                     zeros = confidence.size - ones
 
