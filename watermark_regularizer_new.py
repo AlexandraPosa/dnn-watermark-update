@@ -84,11 +84,11 @@ def show_encoded_watermark(model):
                 confidence_levels = [0.5, 0.7, 0.8, 0.9]
 
                 for level in confidence_levels:
-                    confidence = (watermark.numpy() > level).astype(int)
+                    confidence = (watermark.numpy() >= level).astype(int)
                     ones = np.count_nonzero(confidence)
                     zeros = confidence.size - ones
 
-                    print("Confidence level over {}%:".format(int(level * 100)))
+                    print("Confidence level: {}%".format(int(level * 100)))
                     print("Number of ones: {}\nNumber of zeros: {}\n{}\n".format(ones, zeros, confidence))
 
         except AttributeError:
