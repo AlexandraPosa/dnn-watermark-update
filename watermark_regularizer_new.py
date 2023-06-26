@@ -4,12 +4,13 @@ import numpy as np
 
 class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
 
-    def __init__(self, strength, embed_dim, seed=0):
+    def __init__(self, strength, embed_dim, seed=0, apply_penalty=True):
         self.strength = strength
         self.embed_dim = embed_dim
         self.seed = seed
         self.matrix = None
         self.signature = None
+        self.apply_penalty = apply_penalty
 
     def __call__(self, weights):
         self.weights = weights
@@ -35,7 +36,10 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
                 tf.sigmoid(tf.matmul(weights_flat, proj_matrix)), self.signature))
 
         # apply a penalty to the loss function
-        return regularized_loss
+        if self.apply_penalty:
+            return regularized_loss
+
+        return None
 
     def get_matrix(self):
         return self.matrix

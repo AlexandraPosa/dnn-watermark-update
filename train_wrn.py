@@ -101,6 +101,7 @@ if __name__ == '__main__':
     nb_epoch = train_settings['epoch']
     scale = train_settings['scale']
     embed_dim = train_settings['embed_dim']
+    apply_penalty = train_settings['apply_penalty']
     N = train_settings['N']
     k = train_settings['k']
 
@@ -114,7 +115,8 @@ if __name__ == '__main__':
     modelname_prefix = os.path.join(RESULT_PATH, 'wrn_' + hist_hdf_path.replace('/', '_'))
 
     # create model
-    watermark_regularizer = WatermarkRegularizer(strength=scale, embed_dim=embed_dim, seed=seed_value)
+    watermark_regularizer = WatermarkRegularizer(strength=scale, embed_dim=embed_dim, seed=seed_value,
+                                                 apply_penalty=apply_penalty)
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
                                              wmark_regularizer=watermark_regularizer, target_blk_num=target_blk_id)
