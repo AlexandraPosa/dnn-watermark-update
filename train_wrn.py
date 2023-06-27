@@ -56,12 +56,12 @@ lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
     if (epoch_idx + 1) < lr_schedule[0]:
-        return 0.01
+        return 0.05
     elif (epoch_idx + 1) < lr_schedule[1]:   # lr_decay_ratio = 0.2
-        return 0.002
+        return 0.01
     elif (epoch_idx + 1) < lr_schedule[2]:
-        return 0.0004
-    return 0.00008
+        return 0.002
+    return 0.0004
 
 if __name__ == '__main__':
     settings_json_fname = sys.argv[1]
