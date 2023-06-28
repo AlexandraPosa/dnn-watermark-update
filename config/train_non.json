@@ -8,7 +8,7 @@
   "N": 1,
   "k": 4,
 
-  "apply_penalty": true,
+  "apply_penalty": false,
   "target_blk_id": 1,
   "wmark_wtype": "random",
   "base_modelw_fname": ""

@@ -15,8 +15,8 @@ from keras.optimizers import SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 from watermark_regularizer_new import WatermarkRegularizer
-#from watermark_regularizers import get_wmark_regularizers
-#from watermark_regularizers import show_encoded_wmark
+from watermark_regularizer_new import get_watermark_regularizers
+from watermark_regularizer_new import show_encoded_watermark
 
 # Set the seed value
 seed_value = 0
@@ -44,24 +44,24 @@ def update_hdf5(fname, path, data):
         store.remove(path)
     store.append(path, data)
     store.close()
-"""
-def save_wmark_signatures(prefix, model):
-    for layer_id, wmark_regularizer in get_wmark_regularizers(model):
+
+def save_watermark_signatures(prefix, model):
+    for layer_id, regularizer in get_watermark_regularizers(model):
         fname_w = prefix + '_layer{}_w.npy'.format(layer_id)
         fname_b = prefix + '_layer{}_b.npy'.format(layer_id)
-        np.save(fname_w, wmark_regularizer.get_matrix())
-        np.save(fname_b, wmark_regularizer.get_signature())
-"""
+        np.save(fname_w, regularizer.get_matrix())
+        np.save(fname_b, regularizer.get_signature())
+
 lr_schedule = [60, 120, 160]  # epoch_step
 
 def schedule(epoch_idx):
     if (epoch_idx + 1) < lr_schedule[0]:
-        return 0.01
+        return 0.05
     elif (epoch_idx + 1) < lr_schedule[1]:   # lr_decay_ratio = 0.2
-        return 0.002
+        return 0.01
     elif (epoch_idx + 1) < lr_schedule[2]:
-        return 0.0004
-    return 0.00008
+        return 0.002
+    return 0.0004
 
 if __name__ == '__main__':
     settings_json_fname = sys.argv[1]
@@ -101,6 +101,7 @@ if __name__ == '__main__':
     nb_epoch = train_settings['epoch']
     scale = train_settings['scale']
     embed_dim = train_settings['embed_dim']
+    apply_penalty = train_settings['apply_penalty']
     N = train_settings['N']
     k = train_settings['k']
 
@@ -114,7 +115,8 @@ if __name__ == '__main__':
     modelname_prefix = os.path.join(RESULT_PATH, 'wrn_' + hist_hdf_path.replace('/', '_'))
 
     # create model
-    watermark_regularizer = WatermarkRegularizer(strength=scale, embed_dim=embed_dim, seed=seed_value)
+    watermark_regularizer = WatermarkRegularizer(strength=scale, embed_dim=embed_dim, seed=seed_value,
+                                                 apply_penalty=apply_penalty)
     init_shape = (3, 32, 32) if K.image_data_format() == "channels_first" else (32, 32, 3)
     model = wrn.create_wide_residual_network(init_shape, nb_classes=nb_classes, N=N, k=k, dropout=0.00,
                                              wmark_regularizer=watermark_regularizer, target_blk_num=target_blk_id)
@@ -135,10 +137,11 @@ if __name__ == '__main__':
               validation_data=(testX, testY),
               validation_steps=np.ceil(len(testX)/batch_size))
 
-    #show_encoded_wmark(model)
-
     # print the matrix used for the watermark embedding
-    print('Watermark matrix:\n', watermark_regularizer.get_matrix())
+    print('\nWatermark projection matrix:\n', watermark_regularizer.get_matrix())
+
+    # print the watermark
+    show_encoded_watermark(model)
 
     # validate training accuracy
     yPreds = model.predict(testX)
@@ -156,5 +159,5 @@ if __name__ == '__main__':
     model.save_weights(modelname_prefix + '.weight')
 
     # write watermark matrix and embedded signature to file
-   # if target_blk_id > 0:
-    #    save_wmark_signatures(modelname_prefix, model)
+    if target_blk_id > 0:
+        save_watermark_signatures(modelname_prefix, model)
