@@ -15,27 +15,28 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
     def __call__(self, weights):
         self.weights = weights
 
+        # set a seed
+        np.random.seed(self.seed)
+
         # define the watermark
         #self.signature = np.ones((1, self.embed_dim))
         self.signature = np.random.randint(0, 2, size=self.embed_dim)
         self.signature = self.signature.reshape(1, self.embed_dim)
 
-        # set a seed
-        np.random.seed(self.seed)
-
         # build the projection matrix for the watermark embedding
         mat_rows = np.prod(weights.shape[0:3])
         mat_cols = self.signature.shape[1]
-        self.matrix = np.random.randn(mat_rows, mat_cols)
+        self.proj_matrix = np.random.randn(mat_rows, mat_cols)
 
         # compute cross-entropy loss
         weights_mean = tf.reduce_mean(weights, axis=3)
         weights_flat = tf.reshape(weights_mean, (1, tf.size(weights_mean)))
-        proj_matrix = tf.convert_to_tensor(self.matrix, dtype=tf.float32)
+        proj_matrix = tf.convert_to_tensor(self.proj_matrix, dtype=tf.float32)
+        signature = tf.convert_to_tensor(self.signature, dtype=tf.float32)
 
         regularized_loss = self.strength * tf.reduce_sum(
             tf.keras.losses.binary_crossentropy(
-                tf.sigmoid(tf.matmul(weights_flat, proj_matrix)), self.signature))
+                tf.sigmoid(tf.matmul(weights_flat, proj_matrix)), signature))
 
         # apply a penalty to the loss function
         if self.apply_penalty:
@@ -44,7 +45,7 @@ class WatermarkRegularizer(tf.keras.regularizers.Regularizer):
         return None
 
     def get_matrix(self):
-        return self.matrix
+        return self.proj_matrix
 
     def get_signature(self):
         return self.signature
