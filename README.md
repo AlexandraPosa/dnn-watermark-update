@@ -31,7 +31,7 @@ python train_wrn.py config/train_non_min.json
 
 Extracted watermarks from the embedded host network and the non-embedded network:
 
-![](images/Watermark.png)
+![](images/watermark.png)
 
 ## License
 All codes are provided for research purposes only and without any warranty.
