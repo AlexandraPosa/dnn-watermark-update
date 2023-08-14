@@ -1,11 +1,11 @@
 Embedding Watermarks into Deep Neural Networks
 ====
 Implemented according to 'Embedding Watermarks into Deep Neural Networks' [1], 
-the code embeds a digital watermark into the deep neural network during the training phase.
-This embedding is achieved through the use of a parameter regularizer.
+the code embeds a digital watermark into a wide residual network during the training phase.
+The embedding is achieved by applying a parameter regularizer to the target layer.
 
-The code has been revised to accommodate Tensorflow version 2.12.0. 
-For further reference, you can access the original project through the following link: https://github.com/yu4u/dnn-watermark.
+The code has been revised to accommodate TensorFlow version 2.12.0. 
+For further reference, you can access the original project through the following link: https://github.com/yu4u/dnn-watermark
 
 
 ## Requirements
@@ -17,7 +17,7 @@ pip install pandas==1.5.3
 ```
 
 ## Usage
-Embed the watermark during the training of the host network:
+Embed the watermark during the training phase of the host network:
 
 ```sh
 python train_wrn.py config/train_random_min.json
