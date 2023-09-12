@@ -86,18 +86,5 @@ def show_encoded_watermark(model):
                 print('\nWatermark:')
                 print('Layer Index = {} \nClass = {} \n{}\n'.format(i, layer.__class__.__name__, watermark))
 
-                '''
-                # compute confidence levels
-                confidence_levels = [0.5, 0.7, 0.8, 0.9]
-
-                for level in confidence_levels:
-                    confidence = (watermark > level).astype(int)
-                    ones = np.count_nonzero(confidence)
-                    zeros = confidence.size - ones
-
-                    print("Confidence level: {}%".format(int(level * 100)))
-                    print("Number of ones: {}\nNumber of zeros: {}\n{}\n".format(ones, zeros, confidence)) 
-                '''
-
         except AttributeError:
             continue  # Continue the loop if the layer has no regularizers
